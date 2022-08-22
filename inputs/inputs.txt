@@ -1,0 +1,4 @@
+3
+( dia123 \lor T )
+( a \land ( a \lor b ) )
+( a \land ( a \lor b )
