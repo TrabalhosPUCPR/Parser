@@ -30,6 +30,7 @@ pra comecar uma formula, deve sempre ter uma preposicao, parenteses ou operador 
 
  */
 
+use std::iter::Peekable;
 use std::ops::RangeInclusive;
 use std::str::Chars;
 
@@ -90,7 +91,7 @@ impl Parser {
     }
     pub fn run(&self, formula: &String) -> bool {
         let mut formula_chars = formula.chars();
-        if formula_chars.next().unwrap() == self.inner_formula_opener{
+        if formula_chars.next().unwrap() == self.inner_formula_opener {
             return self.new_formula(&mut formula_chars, false);
         }
         false
@@ -110,20 +111,20 @@ impl Parser {
             let input_type = self.input_type(c.unwrap(), &formula_state, formula);
             match formula_state {
                 FormulaState::Opener => {
-                    if matches!(input_type, FormulaState::BinOperator) || matches!(input_type, FormulaState::UnOperator){
+                    if matches!(input_type, FormulaState::BinOperator)
+                        || matches!(input_type, FormulaState::UnOperator)
+                    {
                         let formula_type = &input_type;
-                    }else{
+                    } else {
                         return false;
                     }
                 }
                 FormulaState::FirstProposition => {
-                    if !matches!(input_type, FormulaState::SecondProposition){
+                    if !matches!(input_type, FormulaState::SecondProposition) {
                         return false;
                     }
                 }
-                FormulaState::SecondProposition => {
-                
-                }
+                FormulaState::SecondProposition => {}
                 FormulaState::BinOperator => {}
                 FormulaState::UnOperator => {}
                 FormulaState::CloseFormula => return if inner { true } else { false },
@@ -148,17 +149,16 @@ impl Parser {
             return self.command_check(command);
         }
         if self.propositions.0.contains(&(input as u32)) {
-            let mut c = formula.next();
+            let mut c = formula.peekable();
             let mut proposition = String::from(input);
-            while !c.unwrap().is_whitespace() {
-                proposition.push(c.unwrap());
-                c = formula.next();
+            while !c.peek().is_some() && c.peek().unwrap() != &self.inner_formula_closer {
+                proposition.push(c.next().unwrap());
             }
             if self.proposition_check(proposition) {
                 return if matches!(state, FormulaState::FirstProposition) {
                     FormulaState::SecondProposition
                 } else {
-                    FormulaState::SecondProposition
+                    FormulaState::FirstProposition
                 };
             }
         }
@@ -188,8 +188,7 @@ impl Parser {
             // agora verifica se tem numeros e para qnd nao tiver mais
             c = chars.next();
         }
-        if c.unwrap().is_whitespace()
-        {
+        if c.is_none() || c.unwrap().is_whitespace() {
             // se o ultimo valor for + ou espaco vazio, e uma preposicao valida
             return true;
         }

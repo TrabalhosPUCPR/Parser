@@ -1,4 +1,4 @@
 3
-(/land a b)
-(/not (/lor a b))
-(/leftrightarrow (/land a b) (/rightarrow a b))
+(\land a b)
+(\not (\lor a b))
+(\leftrightarrow (\land a b) (\rightarrow a b))
