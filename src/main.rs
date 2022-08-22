@@ -40,7 +40,6 @@ programa carregando o arquivo de testes.
 
 mod parser;
 
-use std::borrow::Borrow;
 use std::fs;
 
 fn main() {

@@ -30,7 +30,6 @@ pra comecar uma formula, deve sempre ter uma preposicao, parenteses ou operador 
 
  */
 
-use std::borrow::Borrow;
 use std::ops::RangeInclusive;
 use std::str::Chars;
 
@@ -38,7 +37,7 @@ pub struct Parser {
     command_start: char,
     binary_commands: Vec<String>,
     unary_commands: Vec<String>,
-    propositions: (RangeInclusive<u32>, RangeInclusive<u32>, u32),
+    propositions: (RangeInclusive<u32>, RangeInclusive<u32>),
     inner_formula_opener: char,
     inner_formula_closer: char,
 }
@@ -84,17 +83,21 @@ impl Parser {
                 String::from("rightarrow"),
             ],
             unary_commands: vec![String::from("not")],
-            propositions: (97..=122, 48..=57, 43),
+            propositions: (97..=122, 48..=57),
             inner_formula_opener: '(',
             inner_formula_closer: ')',
         }
     }
     pub fn run(&self, formula: &String) -> bool {
         let mut formula_chars = formula.chars();
-        return self.new_formula(&mut formula_chars, false);
+        if formula_chars.next().unwrap() == self.inner_formula_opener{
+            return self.new_formula(&mut formula_chars, false);
+        }
+        false
     }
 
-    // preposicao -> operador binario -> preposicao
+    // abre -> operadorbin -> preposicao -> preposicao -> fecha
+    // abre -> operadorun -> preposicao -> fecha
 
     fn new_formula(&self, formula: &mut Chars, inner: bool) -> bool {
         let mut formula_state = FormulaState::Opener;
@@ -107,24 +110,19 @@ impl Parser {
             let input_type = self.input_type(c.unwrap(), &formula_state, formula);
             match formula_state {
                 FormulaState::Opener => {
-                    if matches!(input_type, FormulaState::UnOperator)
-                        || matches!(input_type, FormulaState::Opener)
-                    {
+                    if matches!(input_type, FormulaState::BinOperator) || matches!(input_type, FormulaState::UnOperator){
+                        let formula_type = &input_type;
+                    }else{
                         return false;
                     }
                 }
                 FormulaState::FirstProposition => {
-                    if !matches!(input_type, FormulaState::BinOperator) {
+                    if !matches!(input_type, FormulaState::SecondProposition){
                         return false;
                     }
                 }
                 FormulaState::SecondProposition => {
-                    if matches!(input_type, FormulaState::CloseFormula)
-                        || matches!(input_type, FormulaState::BinOperator)
-                        || matches!(input_type, FormulaState::Null)
-                    {
-                        return false;
-                    }
+                
                 }
                 FormulaState::BinOperator => {}
                 FormulaState::UnOperator => {}
@@ -157,10 +155,10 @@ impl Parser {
                 c = formula.next();
             }
             if self.proposition_check(proposition) {
-                return if matches!(state, FormulaState::BinOperator) {
+                return if matches!(state, FormulaState::FirstProposition) {
                     FormulaState::SecondProposition
                 } else {
-                    FormulaState::FirstProposition
+                    FormulaState::SecondProposition
                 };
             }
         }
@@ -190,7 +188,7 @@ impl Parser {
             // agora verifica se tem numeros e para qnd nao tiver mais
             c = chars.next();
         }
-        if c.is_none() || &(c.unwrap() as u32) == &self.propositions.2 || c.unwrap().is_whitespace()
+        if c.unwrap().is_whitespace()
         {
             // se o ultimo valor for + ou espaco vazio, e uma preposicao valida
             return true;

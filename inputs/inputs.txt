@@ -1,4 +1,4 @@
 3
-( dia123 \lor T )
-( a \land ( a \lor b ) )
-( a \land ( a \lor b )
+(/land a b)
+(/not (/lor a b))
+(/leftrightarrow (/land a b) (/rightarrow a b))
