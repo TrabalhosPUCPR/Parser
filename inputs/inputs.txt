@@ -1,6 +1,12 @@
-5
-(\not (\lor a b)
+11
+T
+TF
+(\rightarrow (T) F)
+(\lor a b) \and
 (\not az)
-(\leftrightarrow (\land (\not a b) (\rightarrow a b))
+(\leftrightarrow (\not a b) b)
+(\land (\rightarrow (\not a) (\not (\land a y))) (\lor a b))
+(\land (\rightarrow (\not a) (\not (\land a y)) (\lor a b))
 (\land a b)
 (\and)
+(\not (\lor a b))

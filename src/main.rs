@@ -51,13 +51,11 @@ fn main() {
     let parser = &parser::Parser::new();
     while n > 0 {
         let line = lines.next().unwrap();
-        print!("{line}");
         if parser.run(&String::from(line)) {
-            println!(" : Valido!");
+            println!("Valido!");
         } else {
-            println!(" : Invalido!");
+            println!("Invalido!");
         }
-
         n -= 1;
     }
 }

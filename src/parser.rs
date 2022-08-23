@@ -1,19 +1,20 @@
-/*
+/* Leonardo Matthew Knight
 entrada -> o que deve ser seguido
 
-cada uma das entradas vai ser uma estado, pra poder verificar exatamente se o proximo character esta correto
+cada uma das entradas vai ser um estado, pra poder verificar exatamente se o proximo character esta correto
 
-operador unario -> primeiraPreposicao, (, segundaPreposicao
-primeiraPreposicao -> operador binario
-( -> operador unario, primeiraPreposicao      } chama a propria funcao mais uma vez ate terminar com )
-operador binario -> segundaPreposicao, (, operadorUnario
-segundaPreposicao -> nada, ), operador binario
-) -> nada, operadorBinario
+os nomes sao iguais aos do enum dos estados
 
+Opener -> operadorBin, operadorUn
+operadorBin -> firstPreposition
+operadorUn -> secondPreposition (ele conta a primeira preposicao que encontrar como segunda, pq e a unica q tenq aparecer dps de um operador unario)
+firstPreposition -> secondPreposition
+secondPreposition -> closer
 
-pra comecar uma formula, deve sempre ter uma preposicao, parenteses ou operador unario
+pra comecar uma formula, deve sempre ter (
 
-// por padrao so pra n me perde
+// os comandos padrao so pra n me perde
+
 - \ : inicio de comando:
     \neg : ¬
     \lor : ∨
@@ -30,7 +31,6 @@ pra comecar uma formula, deve sempre ter uma preposicao, parenteses ou operador 
 
  */
 
-use std::iter::Peekable;
 use std::ops::RangeInclusive;
 use std::str::Chars;
 
@@ -41,16 +41,17 @@ pub struct Parser {
     propositions: (RangeInclusive<u32>, RangeInclusive<u32>),
     inner_formula_opener: char,
     inner_formula_closer: char,
+    constants: (char, char),
 }
 
 enum FormulaState {
-    Opener, // esse e o estado inicial, onde vai aceitar as mesmas entradas que o (
+    Opener, // esse e o estado inicial
     FirstProposition,
     SecondProposition,
     BinOperator,
     UnOperator,
     CloseFormula,
-    Null,
+    Null, // esse e o estado quando da erro
 }
 
 impl Parser {
@@ -76,7 +77,6 @@ impl Parser {
     pub fn new() -> Parser {
         Parser {
             command_start: '\\',
-            // bem ridiculo isso aqui
             binary_commands: vec![
                 String::from("land"),
                 String::from("lor"),
@@ -87,12 +87,17 @@ impl Parser {
             propositions: (97..=122, 48..=57),
             inner_formula_opener: '(',
             inner_formula_closer: ')',
+            constants: ('T', 'F'),
         }
     }
     pub fn run(&self, formula: &String) -> bool {
         let mut formula_chars = formula.chars();
-        if formula_chars.next().unwrap() == self.inner_formula_opener {
-            return self.new_formula(&mut formula_chars, false);
+        let next = formula_chars.next();
+        if next.unwrap() == self.inner_formula_opener {
+            return self.new_formula(&mut formula_chars) && formula_chars.next().is_none();
+        }
+        if next.unwrap() == self.constants.0 || next.unwrap() == self.constants.1 {
+            return formula_chars.next().is_none();
         }
         false
     }
@@ -100,13 +105,16 @@ impl Parser {
     // abre -> operadorbin -> preposicao -> preposicao -> fecha
     // abre -> operadorun -> preposicao -> fecha
 
-    fn new_formula(&self, formula: &mut Chars, inner: bool) -> bool {
+    fn new_formula(&self, formula: &mut Chars) -> bool {
         let mut formula_state = FormulaState::Opener;
         let mut c = formula.next();
         while c.is_some() && !matches!(formula_state, FormulaState::Null) {
             if c.unwrap().is_whitespace() {
                 c = formula.next();
                 continue;
+            }
+            if c.unwrap() == self.constants.0 || c.unwrap() == self.constants.1 {
+                return formula.next().unwrap() == self.inner_formula_closer;
             }
             let mut input_type = self.input_type(c.unwrap(), &formula_state, formula);
             match formula_state {
@@ -144,8 +152,6 @@ impl Parser {
                 FormulaState::CloseFormula => return true,
                 FormulaState::Null => return false,
             }
-            // o dia que os cara termina de implementa o advance_back_by() pq o peekable nao faz o que eu quero eu vo
-            // realmente comecar a gostar de rust
             c = formula.next();
             formula_state = input_type;
         }
@@ -162,9 +168,16 @@ impl Parser {
             }
             return self.command_check(command);
         }
+        if input == self.constants.0 || input == self.constants.1 {
+            return if matches!(state, FormulaState::FirstProposition) {
+                FormulaState::SecondProposition
+            } else {
+                FormulaState::FirstProposition
+            };
+        }
         if self.propositions.0.contains(&(input as u32)) {
             let mut proposition = String::from(input);
-            let mut peekable = formula.clone().peekable(); // TUDO ISSO SO PQ O advance_back_by() NAO FOI IMPLEMENTADO AINDA
+            let mut peekable = formula.clone().peekable(); // TUDO ISSO SO PQ O advance_back_by() NAO FOI IMPLEMENTADO AINDA E O PRIMEIRO PEEK() AINDA DA NEXT()
             let mut next_peek = peekable.next();
             while next_peek.is_some()
                 && next_peek.unwrap() != self.inner_formula_closer
@@ -182,7 +195,7 @@ impl Parser {
             }
         }
         if &self.inner_formula_opener == &input {
-            if !self.new_formula(formula, true) {
+            if !self.new_formula(formula) {
                 return FormulaState::Null;
             }
             return if matches!(state, FormulaState::FirstProposition) {
