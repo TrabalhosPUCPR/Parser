@@ -40,10 +40,18 @@ programa carregando o arquivo de testes.
 
 mod parser;
 
-use std::fs;
+use std::{env, fs};
 
 fn main() {
-    let file_path = "inputs/inputs.txt";
+    let args: Vec<String> = env::args().collect();
+    let argument = args.get(1);
+    let file_path: &str;
+    if argument.is_none() {
+        // caso executar sem argumento, executa o arquivo de teste padrao
+        file_path = "src/input.txt";
+    } else {
+        file_path = argument.unwrap().as_str();
+    }
 
     let text_contents = fs::read_to_string(file_path).expect("Arquivo nao encontrado");
     let mut lines = text_contents.lines();
