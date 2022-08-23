@@ -47,16 +47,16 @@ lógicas estão no arquivo.
 A saída do seu programa será no terminal padrão do sistema e constituirá de uma linha de saída
 para cada expressão lógica de entrada contendo ou a palavra valida ou a palavra inválida e nada mais.
 
-Gramática:
-Formula=Constante|Proposicao|FormulaUnaria|FormulaBinaria.
-Constante="T"|"F".
-Proposicao=[a−z0−9]+
-FormulaUnaria=AbreParen OperadorUnario Formula FechaParen
-FormulaBinaria=AbreParen OperatorBinario Formula Formula FechaParen
-AbreParen="("
-FechaParen=")"
-OperatorUnario="¬"
-OperatorBinario="∨"|"∧"|"→"|"↔"
+Gramática:<br />
+Formula=Constante|Proposicao|FormulaUnaria|FormulaBinaria.<br />
+Constante="T"|"F".<br />
+Proposicao=[a−z0−9]+<br />
+FormulaUnaria=AbreParen OperadorUnario Formula FechaParen<br />
+FormulaBinaria=AbreParen OperatorBinario Formula Formula FechaParen<br />
+AbreParen="("<br />
+FechaParen=")"<br />
+OperatorUnario="¬"<br />
+OperatorBinario="∨"|"∧"|"→"|"↔"<br />
 
 Cada expressão lógica avaliada pode ter qualquer combinação das operações de negação,
 conjunção, disjunção, implicação e bi-implicação sem limites na combiação de preposições e operações.
