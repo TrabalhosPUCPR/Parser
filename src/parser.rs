@@ -108,14 +108,12 @@ impl Parser {
                 c = formula.next();
                 continue;
             }
-            let input_type = self.input_type(c.unwrap(), &formula_state, formula);
+            let mut input_type = self.input_type(c.unwrap(), &formula_state, formula);
             match formula_state {
                 FormulaState::Opener => {
-                    if matches!(input_type, FormulaState::BinOperator)
-                        || matches!(input_type, FormulaState::UnOperator)
+                    if !matches!(input_type, FormulaState::BinOperator)
+                        && !matches!(input_type, FormulaState::UnOperator)
                     {
-                        let formula_type = &input_type;
-                    } else {
                         return false;
                     }
                 }
@@ -124,35 +122,56 @@ impl Parser {
                         return false;
                     }
                 }
-                FormulaState::SecondProposition => {}
-                FormulaState::BinOperator => {}
-                FormulaState::UnOperator => {}
-                FormulaState::CloseFormula => return if inner { true } else { false },
-                FormulaState::Null => {
-                    return false;
+                FormulaState::SecondProposition => {
+                    return if !matches!(input_type, FormulaState::CloseFormula) {
+                        false
+                    } else {
+                        true
+                    }
                 }
+                FormulaState::BinOperator => {
+                    if !matches!(input_type, FormulaState::FirstProposition) {
+                        return false;
+                    }
+                }
+                FormulaState::UnOperator => {
+                    if !matches!(input_type, FormulaState::FirstProposition) {
+                        return false;
+                    } else {
+                        input_type = FormulaState::SecondProposition;
+                    }
+                }
+                FormulaState::CloseFormula => return true,
+                FormulaState::Null => return false,
             }
-            formula_state = input_type;
+            // o dia que os cara termina de implementa o advance_back_by() pq o peekable nao faz o que eu quero eu vo
+            // realmente comecar a gostar de rust
             c = formula.next();
+            formula_state = input_type;
         }
-        true
+        false
     }
 
     fn input_type(&self, input: char, state: &FormulaState, formula: &mut Chars) -> FormulaState {
         if &input == &self.command_start {
             let mut c = formula.next();
             let mut command: String = String::new();
-            while !c.unwrap().is_whitespace() {
+            while c.is_some() && !c.unwrap().is_whitespace() {
                 command.push(c.unwrap());
                 c = formula.next();
             }
             return self.command_check(command);
         }
         if self.propositions.0.contains(&(input as u32)) {
-            let mut c = formula.peekable();
             let mut proposition = String::from(input);
-            while !c.peek().is_some() && c.peek().unwrap() != &self.inner_formula_closer {
-                proposition.push(c.next().unwrap());
+            let mut peekable = formula.clone().peekable(); // TUDO ISSO SO PQ O advance_back_by() NAO FOI IMPLEMENTADO AINDA
+            let mut next_peek = peekable.next();
+            while next_peek.is_some()
+                && next_peek.unwrap() != self.inner_formula_closer
+                && !next_peek.unwrap().is_whitespace()
+            {
+                proposition.push(formula.next().unwrap());
+                next_peek = peekable.next();
             }
             if self.proposition_check(proposition) {
                 return if matches!(state, FormulaState::FirstProposition) {
@@ -166,7 +185,7 @@ impl Parser {
             if !self.new_formula(formula, true) {
                 return FormulaState::Null;
             }
-            return if !matches!(state, FormulaState::BinOperator) {
+            return if matches!(state, FormulaState::FirstProposition) {
                 FormulaState::SecondProposition
             } else {
                 FormulaState::FirstProposition

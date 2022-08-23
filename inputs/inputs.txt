@@ -1,4 +1,6 @@
-3
+5
+(\not (\lor a b)
+(\not az)
+(\leftrightarrow (\land (\not a b) (\rightarrow a b))
 (\land a b)
-(\not (\lor a b))
-(\leftrightarrow (\land a b) (\rightarrow a b))
+(\and)
