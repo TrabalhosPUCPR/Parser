@@ -1,7 +1,9 @@
-11
+13
 T
 TF
 (\rightarrow (T) F)
+(→ (T) F)
+(∧ (→ (¬ a) (¬ (∧ a y))) (∨ a b))
 (\lor a b) \and
 (\not az)
 (\leftrightarrow (\not a b) b)

@@ -35,9 +35,11 @@ use std::ops::RangeInclusive;
 use std::str::Chars;
 
 pub struct Parser {
-    command_start: char,
-    binary_commands: Vec<String>,
-    unary_commands: Vec<String>,
+    latex_command_start: char,
+    binary_commands: Vec<char>,
+    latex_binary_commands: Vec<String>,
+    unary_commands: Vec<char>,
+    latex_unary_commands: Vec<String>,
     propositions: (RangeInclusive<u32>, RangeInclusive<u32>),
     inner_formula_opener: char,
     inner_formula_closer: char,
@@ -55,35 +57,18 @@ enum FormulaState {
 }
 
 impl Parser {
-    /* CODIGO DESNECESSARIO
-    pub fn new_with_grammar(
-        command_start: char,
-        binary_commands: Vec<String>,
-        unary_commands: Vec<String>,
-        inner_formula_opener: char,
-        inner_formula_closer: char,
-        propositions: (RangeInclusive<u32>, RangeInclusive<u32>, u32),
-    ) -> Parser {
-        Parser {
-            command_start,
-            binary_commands,
-            unary_commands,
-            propositions,
-            inner_formula_opener,
-            inner_formula_closer,
-        }
-    }
-    */
     pub fn new() -> Parser {
         Parser {
-            command_start: '\\',
-            binary_commands: vec![
+            latex_command_start: '\\',
+            binary_commands: vec!['∧', '∨', '↔', '→'],
+            latex_binary_commands: vec![
                 String::from("land"),
                 String::from("lor"),
                 String::from("leftrightarrow"),
                 String::from("rightarrow"),
             ],
-            unary_commands: vec![String::from("not")],
+            unary_commands: vec!['¬'],
+            latex_unary_commands: vec![String::from("not")],
             propositions: (97..=122, 48..=57),
             inner_formula_opener: '(',
             inner_formula_closer: ')',
@@ -159,14 +144,17 @@ impl Parser {
     }
 
     fn input_type(&self, input: char, state: &FormulaState, formula: &mut Chars) -> FormulaState {
-        if &input == &self.command_start {
+        if &input == &self.latex_command_start {
             let mut c = formula.next();
             let mut command: String = String::new();
             while c.is_some() && !c.unwrap().is_whitespace() {
                 command.push(c.unwrap());
                 c = formula.next();
             }
-            return self.command_check(command);
+            return self.latex_command_check(command);
+        }
+        if self.binary_commands.contains(&input) || self.unary_commands.contains(&input) {
+            return self.command_check(input);
         }
         if input == self.constants.0 || input == self.constants.1 {
             return if matches!(state, FormulaState::FirstProposition) {
@@ -227,7 +215,16 @@ impl Parser {
         false
     }
 
-    fn command_check(&self, com: String) -> FormulaState {
+    fn latex_command_check(&self, com: String) -> FormulaState {
+        if self.latex_binary_commands.contains(&com) {
+            return FormulaState::BinOperator;
+        } else if self.latex_unary_commands.contains(&com) {
+            return FormulaState::UnOperator;
+        }
+        return FormulaState::Null;
+    }
+
+    fn command_check(&self, com: char) -> FormulaState {
         if self.binary_commands.contains(&com) {
             return FormulaState::BinOperator;
         } else if self.unary_commands.contains(&com) {
