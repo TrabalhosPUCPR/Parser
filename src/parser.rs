@@ -87,8 +87,8 @@ impl Parser {
         false
     }
 
-    // abre -> operadorbin -> preposicao -> preposicao -> fecha
-    // abre -> operadorun -> preposicao -> fecha
+    // abre -> operadorbin -> proposicao -> proposicao -> fecha
+    // abre -> operadorun -> proposicao -> fecha
 
     fn new_formula(&self, formula: &mut Chars) -> bool {
         let mut formula_state = FormulaState::Opener;

@@ -59,7 +59,7 @@ fn main() {
     let parser = &parser::Parser::new();
     while n > 0 {
         let line = lines.next().unwrap();
-        //print!("{} : ", line); so tirar esse comentario pra prin
+        //print!("{} : ", line);
         if parser.run(&String::from(line)) {
             println!("Valido!");
         } else {
