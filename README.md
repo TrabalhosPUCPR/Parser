@@ -5,10 +5,15 @@ Um programa escrito em Rust para verificar se uma expressao logica escrita em la
 [link do replit para rodar](https://replit.com/@knightleo602/Parser-logica-proposicional?v=1)
 
 Para rodar no terminal, basta compilar o arquivo main:
+##### no windows
+```
+rustc /src/main.rs -o src/main.exe
+```
+##### no linux/OSX
 ```
 rustc /src/main.rs -o src/main
 ```
-
+<br />
 e rodar ele:
 
 ##### no windows:
@@ -20,7 +25,7 @@ e rodar ele:
 ./src/main
 ```
 
-Para rodar um arquivo proprio, digite o local do arquivo
+Para passar um arquivo de texto proprio, digite o local do arquivo
 ##### ex:
 ```
 ./src/main src/teste.txt
