@@ -6,9 +6,9 @@ TF
 (∧ (→ (¬ a) (¬ (∧ a y))) (∨ a b))
 (\lor a b) \and
 (\lnot az)
-(\leftrightarrow (\not a b) b)
+(\leftrightarrow (\neg a b) b)
 (\land (\rightarrow (\neg a) (\lnot (\land a y))) (\lor a b))
 (\land (\rightarrow (\neg a) (\lnot (\land a y)) (\lor a b))
 (\land a b)
-(\and)
+(\land)
 (\neg (\lor a b))
