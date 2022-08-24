@@ -9,6 +9,6 @@ TF
 (\leftrightarrow (\neg a b) b)
 (\land (\rightarrow (\neg a) (\lnot (\land a y))) (\lor a b))
 (\land (\rightarrow (\neg a) (\lnot (\land a y)) (\lor a b))
-(\land a b)
+(\wedge a b)
 (\land)
-(\neg (\lor a b))
+(\neg (\vee a b))

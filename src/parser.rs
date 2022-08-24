@@ -63,7 +63,9 @@ impl Parser {
             binary_commands: vec!['∧', '∨', '↔', '→'],
             latex_binary_commands: vec![
                 String::from("land"),
+                String::from("wedge"),
                 String::from("lor"),
+                String::from("vee"),
                 String::from("leftrightarrow"),
                 String::from("rightarrow"),
             ],
