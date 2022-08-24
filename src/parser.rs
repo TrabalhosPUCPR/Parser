@@ -68,7 +68,7 @@ impl Parser {
                 String::from("rightarrow"),
             ],
             unary_commands: vec!['¬'],
-            latex_unary_commands: vec![String::from("not")],
+            latex_unary_commands: vec![String::from("lnot"), String::from("neg")],
             propositions: (97..=122, 48..=57),
             inner_formula_opener: '(',
             inner_formula_closer: ')',
